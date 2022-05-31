@@ -1,0 +1,50 @@
+﻿<h1 class="mt-2 mb-2" style="margin-top: 20px;">@Title</h1>
+    
+    
+
+    <EditForm Model="@Customer" OnInvalidSubmit="@ValidSubmit">
+                <DataAnnotationsValidator/>
+                <InputWatcher FieldChanged="@FieldChanged" @ref="@inputWatcher"/>
+                
+        <fieldset>
+        <div class="row mb-2">
+            <label for="name" class="col-2">Name:</label>
+            <input type="text" class="col-6" id="name" @bind-value="@Customer.Name">
+        </div>
+        <div class="row mb-2">
+            <div class="col-6 offset-2">
+                <ValidationMessage For="@(() => @Customer.Name)" />
+            </div>
+        </div>
+
+
+        <div class="row mb-2">
+            <label for="street" class="col-2">Street:</label>
+            <input type="text" class="col-6" name="street" id="street" @bind-value="@Customer.Street">
+        </div>
+        <div class="row mb-2">
+            <div class="col-6 offset-2">
+                <ValidationMessage For="@(() => @Customer.Street)" />
+            </div>
+        </div>
+
+
+        <div class="row mb-2">
+            <label for="city" class="col-2">City:</label>
+            <input type="text" class="col-6" name="city" id="city" @bind-value="@Customer.City">
+        </div>
+        <div class="row mb-2">
+            <div class="col-6 offset-2">
+                <ValidationMessage For="@(() => @Customer.City)" />
+            </div>
+        </div>
+       
+        <div class="row mb-2">
+		<button class="@ButtonClass" disbaled="@isInvalid">@ButtonTitle</button>
+        </div>
+    </fieldset>
+    </EditForm>
+
+@code {
+
+}

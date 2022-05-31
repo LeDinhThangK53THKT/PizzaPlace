@@ -1,0 +1,158 @@
+﻿@inject IMenuService MenuService
+@inject IOrderService orderService
+
+<link rel="stylesheet" type="text/css" href="css/app.css?version=0.1">
+<h1>Chào Bạn</h1>
+
+
+<h1 style="margin-top: 10px">Menu Pizzas của chúng tôi gồm</h1>
+
+@code {
+
+    private State state {get; } = new State();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Menu menu = await MenuService.GetMenu();
+        foreach (Pizza pizza in menu.Pizzas)
+        {
+            state.Menu.addPizza(pizza);
+        }
+    }
+
+    private async Task PlaceOrder()
+    {
+        await orderService.PlaceOrder(state.Basket);
+    }
+
+    //protected override void OnInitialized()
+    //{
+    //    state.Menu.addPizza(new Pizza(1, "Pepperoni", 8.99M, Spiciness.Spicy));
+    //    state.Menu.addPizza(new Pizza(2, "Margarita", 7.99M, Spiciness.None));
+    //    state.Menu.addPizza(new Pizza(3, "Diabolo", 9.99M, Spiciness.Hot));
+    //}
+
+    //private void PlaceOrder()
+    //{
+    //    Console.WriteLine("Placing order");
+        
+    //}
+
+    private string SpicinessImage(Spiciness spiciness)
+    => $"images/{spiciness.ToString().ToLower()}.png";
+
+    private void AddToBasket(Pizza pizza) => state.Basket.Add(pizza.Id);
+    private void RemoveFromBasket(int pos) => state.Basket.RemoveAt(pos);
+
+    
+       
+
+    
+}
+
+
+@foreach (var pizza in state.Menu.Pizzas)
+{
+    <div style="display: flex; justify-content: space-between;" class="row">
+        <div class="col">
+            @pizza.Name
+        </div>
+        <div class="col text-right">
+            @($"{pizza.Price:0.00}")
+        </div>
+        <div class="col">
+
+        </div>
+        <div class="col">
+            <img src="@SpicinessImage(pizza.spiciness)" alt="@pizza.spiciness">
+        </div>
+        <div class="col">
+            <button class="btn btn-success pl-4 pr-4" @onclick="@(() => AddToBasket(pizza))"> Add</button>
+        </div>
+    </div>
+}
+
+@if (state.Basket.Orders.Any())
+{
+    <h1 style="margin-top: 10px">Đơn hàng của bạn</h1>
+    @foreach (var (pizza, pos)  in state.Basket.Orders.Select((id, pos) => (state.Menu.GetPizza(id), pos)))
+    {
+        <div style="margin-bottom: 10px; display: flex; justify-content: space-between" class="row-mb2">
+        <div class="col">
+            @pizza.Name
+        </div>
+        <div class="col text-right">
+            @($"{pizza.Price:0.00}")
+        </div>
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col">
+            <button class="btn btn-danger" @onclick="@(() => RemoveFromBasket(pos))">Remove</button>
+        </div>
+    </div>
+    }
+    <div class="row">
+        <div class="col"></div>
+        <div class="col">
+            <hr/>
+        </div>
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col"></div>
+    </div>
+
+    <div class="row">
+        <div class="col">Tổng Tiền: </div>
+        <div class="col text-right font-weight-bold"> @($"{state.TotalPrice:0.00}")</div>
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col"></div>
+    </div>
+
+    <h1 class="mt-2 mb-2" style="margin-top: 20px;">Nhập thông tin của bạn vào vùng dưới đây!</h1>
+    
+    
+
+    <EditForm Model="@state.Basket.Customer" OnInvalidSubmit="PlaceOrder">
+        <ValidationSummary/>
+        <DataAnnotationsValidator />
+        <fieldset>
+        <div class="row mb-2">
+            <label for="name" class="col-2">Name:</label>
+            <input type="text" class="col-6" id="name" @bind="state.Basket.Customer.Name">
+        </div>
+        <div class="row mb-2">
+            <div class="col-6 offset-2">
+                <ValidationMessage For="@(() => state.Basket.Customer.Name)" />
+            </div>
+        </div>
+
+
+        <div class="row mb-2">
+            <label for="street" class="col-2">Street:</label>
+            <input type="text" class="col-6" name="street" id="street" @bind="state.Basket.Customer.Street">
+        </div>
+        <div class="row mb-2">
+            <div class="col-6 offset-2">
+                <ValidationMessage For="@(() => state.Basket.Customer.Street)" />
+            </div>
+        </div>
+
+
+        <div class="row mb-2">
+            <label for="city" class="col-2">City:</label>
+            <input type="text" class="col-6" name="city" id="city" @bind="state.Basket.Customer.City">
+        </div>
+        <div class="row mb-2">
+            <div class="col-6 offset-2">
+                <ValidationMessage For="@(() => state.Basket.Customer.City)" />
+            </div>
+        </div>
+
+        <button style="margin-bottom: 20px" @onclick="PlaceOrder" class="mx-auto w-25 btn btn-success" >Checkout</button>
+    </fieldset>
+    </EditForm>
+}
+
+
+@state.ToJoin()
